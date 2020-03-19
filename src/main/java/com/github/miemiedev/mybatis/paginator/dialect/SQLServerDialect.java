@@ -21,7 +21,8 @@ public class SQLServerDialect extends Dialect{
 	}
 
 
-    protected String getLimitString(String sql, String offsetName,int offset, String limitName, int limit) {
+    @Override
+    protected String getLimitString(String sql, String offsetName, int offset, String limitName, int limit) {
 		if ( offset > 0 ) {
 			throw new UnsupportedOperationException( "sql server has no offset" );
 		}

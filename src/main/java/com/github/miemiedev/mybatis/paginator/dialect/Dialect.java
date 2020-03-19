@@ -61,8 +61,14 @@ public class Dialect {
                 MetaObject metaObject = mappedStatement.getConfiguration().newMetaObject(parameterObject);
                 ObjectWrapper wrapper = metaObject.getObjectWrapper();
                 for (ParameterMapping parameterMapping : parameterMappings) {
-                    PropertyTokenizer prop = new PropertyTokenizer(parameterMapping.getProperty());
-                    pageParameters.put(parameterMapping.getProperty(),wrapper.get(prop));
+                    if (wrapper.hasGetter(parameterMapping.getProperty())){
+                        PropertyTokenizer prop = new PropertyTokenizer(parameterMapping.getProperty());
+                        pageParameters.put(parameterMapping.getProperty(),wrapper.get(prop));
+                    } else {
+                        pageParameters.put(parameterMapping.getProperty(),
+                                boundSql.getAdditionalParameter(parameterMapping.getProperty()));
+                    }
+
                 }
             }
 

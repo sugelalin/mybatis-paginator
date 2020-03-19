@@ -13,7 +13,8 @@ public class PostgreSQLDialect extends Dialect{
         super(mappedStatement, parameterObject, pageBounds);
     }
 
-    protected String getLimitString(String sql, String offsetName,int offset, String limitName, int limit) {
+    @Override
+    protected String getLimitString(String sql, String offsetName, int offset, String limitName, int limit) {
         StringBuffer buffer = new StringBuffer( sql.length()+20 ).append(sql);
         if(offset > 0){
             buffer.append(" limit ? offset ?");

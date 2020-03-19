@@ -13,7 +13,8 @@ public class OracleDialect extends Dialect{
         super(mappedStatement, parameterObject, pageBounds);
     }
 
-    protected String getLimitString(String sql, String offsetName,int offset, String limitName, int limit) {
+    @Override
+    protected String getLimitString(String sql, String offsetName, int offset, String limitName, int limit) {
 		sql = sql.trim();
 		boolean isForUpdate = false;
 		if ( sql.toLowerCase().endsWith(" for update") ) {

@@ -32,7 +32,8 @@ public class DB2Dialect extends Dialect{
 		return sql.toLowerCase().indexOf("select distinct")>=0;
 	}
 
-    protected String getLimitString(String sql, String offsetName,int offset, String limitName, int limit) {
+    @Override
+    protected String getLimitString(String sql, String offsetName, int offset, String limitName, int limit) {
 		int startOfSelect = sql.toLowerCase().indexOf("select");
 
 		StringBuffer pagingSelect = new StringBuffer( sql.length()+100 )

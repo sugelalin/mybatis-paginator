@@ -50,11 +50,18 @@ public class SQLHelp {
                                final MappedStatement mappedStatement, final Transaction transaction, final Object parameterObject,
                                final BoundSql boundSql, Dialect dialect) throws SQLException {
         final String count_sql = dialect.getCountSQL();
-        logger.debug("Total count SQL [{}] ", count_sql);
+        final String simple_count_sql = dialect.getSimpleCountSQL();
+        logger.debug("Total count simple_count_sql [{}] ", simple_count_sql);
+        logger.debug("Total count count_sql [{}] ", count_sql);
         logger.debug("Total count Parameters: {} ", parameterObject);
 
         Connection connection = transaction.getConnection();
-        PreparedStatement countStmt = connection.prepareStatement(count_sql);
+        PreparedStatement countStmt;
+        try {
+            countStmt = connection.prepareStatement(simple_count_sql);
+        } catch (Throwable e) {
+            countStmt = connection.prepareStatement(count_sql);
+        }
         DefaultParameterHandler handler = new DefaultParameterHandler(mappedStatement,parameterObject,boundSql);
         handler.setParameters(countStmt);
 

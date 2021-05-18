@@ -2,6 +2,7 @@ package com.github.miemiedev.mybatis.paginator.dialect;
 
 import com.github.miemiedev.mybatis.paginator.domain.Order;
 import com.github.miemiedev.mybatis.paginator.domain.PageBounds;
+import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ParameterMapping;
@@ -12,8 +13,12 @@ import org.apache.ibatis.reflection.wrapper.ObjectWrapper;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.springframework.util.StringUtils;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * 类似hibernate的Dialect,但只精简出分页部分
@@ -31,6 +36,9 @@ public class Dialect {
 
     private String pageSQL;
     private String countSQL;
+    private String simpleCountSQL;
+
+    private static final Pattern ORDER_BY = Pattern.compile("order by .*(desc|asc)");
 
 
     public Dialect(MappedStatement mappedStatement, Object parameterObject, PageBounds pageBounds){
@@ -91,6 +99,7 @@ public class Dialect {
 
 
         countSQL = getCountString(sql);
+        simpleCountSQL = getSimpleCountString(sql);
     }
 
 
@@ -118,7 +127,11 @@ public class Dialect {
         return countSQL;
     }
 
-    
+    public String getSimpleCountSQL() {
+        return simpleCountSQL;
+    }
+
+
     /**
      * 将sql变成分页sql语句
      */
@@ -133,6 +146,21 @@ public class Dialect {
      */
     protected String getCountString(String sql){
         return "select count(1) from (" + sql + ") tmp_count";
+    }
+
+    /**
+     * 将sql转换为总记录数SQL，并尝试去掉 order by
+     * @param sql
+     * @return
+     */
+    protected String getSimpleCountString(String sql) {
+        String[] orderArr = sql.split("order by");
+        // step1 如果 sql中有多个 order by 则不转换
+        if (orderArr.length > 2) {
+            return getCountString(sql);
+        }
+        // step2 去掉 sql中的 order by xxx desc/asc 语句
+        return  "select count(1) from (" + ORDER_BY.matcher(sql).replaceAll(" ") + ") tmp_count";
     }
 
     /**

@@ -56,16 +56,14 @@ public class SQLHelp {
         logger.debug("Total count Parameters: {} ", parameterObject);
 
         Connection connection = transaction.getConnection();
-        PreparedStatement countStmt;
-        try {
-            countStmt = connection.prepareStatement(simple_count_sql);
-        } catch (Throwable e) {
-            countStmt = connection.prepareStatement(count_sql);
-        }
         DefaultParameterHandler handler = new DefaultParameterHandler(mappedStatement,parameterObject,boundSql);
-        handler.setParameters(countStmt);
-
-        ResultSet rs = countStmt.executeQuery();
+        ResultSet rs = null;
+        // 若 simple_count_sql 执行失败则使用原 count_sql 查询count 值
+        try {
+            rs = getResultSet(simple_count_sql, connection, handler);
+        } catch (Throwable e) {
+            rs = getResultSet(count_sql, connection, handler);
+        }
         int count = 0;
         if (rs.next()) {
             count = rs.getInt(1);
@@ -73,6 +71,12 @@ public class SQLHelp {
         logger.debug("Total count: {}", count);
         return count;
 
+    }
+
+    private static ResultSet getResultSet(String sql, Connection connection, DefaultParameterHandler handler) throws SQLException{
+        PreparedStatement countStmt = connection.prepareStatement(sql);
+        handler.setParameters(countStmt);
+        return countStmt.executeQuery();
     }
 
 }
